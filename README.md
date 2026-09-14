@@ -20,7 +20,3 @@ HFSR-Net/
 ## Availability
 
 This repository provides representative sample previews of the SODP dataset. After publication, additional relevant data may be made available, subject to the licensing requirements of the source data.
-
-## Citation
-
-Citation information will be added after publication.
