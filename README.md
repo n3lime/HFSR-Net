@@ -19,7 +19,7 @@ HFSR-Net/
 
 ## Availability
 
-The repository is intended to provide a concise preview of the proposed method and dataset during the manuscript review stage. Additional materials may be added after publication.
+This repository provides representative sample previews of the SODP dataset. After publication, additional relevant data may be made available, subject to the licensing requirements of the source data.
 
 ## Citation
 
