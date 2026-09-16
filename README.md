@@ -21,4 +21,4 @@ HFSR-Net/
 
 This repository provides representative sample previews of the SODP dataset. After publication, additional relevant data may be made available, subject to the licensing requirements of the source data.
 
-Researchers interested in the SODP dataset may email [nelime77@gmail.com](mailto:nelime77@gmail.com?subject=SODP%20Dataset%20Access%20Request) with the subject "SODP Dataset Access Request", briefly stating their affiliation, research area, and intended use, for further information regarding data access. Please submit requests by email rather than through public GitHub Issues.
+The research team is affiliated with the School of Electronic Engineering, Heilongjiang University. Researchers interested in the SODP dataset are welcome to submit a [Dataset Access Request](https://docs.google.com/forms/d/e/1FAIpQLSdFuKdgP5Qnv1NZxEqmzBumIaxraToJ5g0hvDb-O3JA3mThlw/viewform) for further information regarding data access and research enquiries.
