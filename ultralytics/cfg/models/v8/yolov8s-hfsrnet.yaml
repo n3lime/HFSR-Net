@@ -1,0 +1,57 @@
+# HFSR-Net for the YOLOv8s primary backbone.
+# Auxiliary branch stage depths are fixed at [2, 2, 8, 2], matching the paper.
+
+nc: 80
+scales:
+  n: [0.33, 0.25, 1024]
+  s: [0.33, 0.50, 1024]
+  m: [0.67, 0.75, 768]
+  l: [1.00, 1.00, 512]
+  x: [1.00, 1.25, 512]
+
+backbone:
+  # Shared stem: two CBS downsampling operations before the branch split.
+  - [-1, 1, Conv, [64, 3, 2]]         # 0-P1/2
+  - [-1, 1, Conv, [128, 3, 2]]        # 1-P2/4
+
+  # Primary branch: standard YOLOv8 backbone.
+  - [1, 3, C2f, [128, True]]          # 2 primary P2
+  - [-1, 1, Conv, [256, 3, 2]]        # 3 primary P3 downsample
+  - [-1, 6, C2f, [256, True]]         # 4 primary P3
+  - [-1, 1, Conv, [512, 3, 2]]        # 5 primary P4 downsample
+  - [-1, 6, C2f, [512, True]]         # 6 primary P4
+  - [-1, 1, Conv, [1024, 3, 2]]       # 7 primary P5 downsample
+  - [-1, 3, C2f, [1024, True]]        # 8 primary P5
+
+  # Contextual relationship modeling branch: [LRE x2, LRE x2, VSS x8, VSS x2].
+  - [1, 2, LREBlock, [128]]           # 9 auxiliary P2, stage 1
+  - [-1, 1, Conv, [256, 3, 2]]        # 10 auxiliary P3 CBS downsample
+  - [-1, 2, LREBlock, [256]]          # 11 auxiliary P3, stage 2
+  - [-1, 1, Conv, [512, 3, 2]]        # 12 auxiliary P4 CBS downsample
+  # Keep the VSS stages and SSM expansion unchanged; use a 2.36x MLP
+  # expansion to calibrate the complete YOLOv8s model to approximately 28.9M
+  # parameters (28.896M for the nc=1 training dataset).
+  - [-1, 8, VSSBlock, [512, 16, 2.0, 3, 2.36]]  # 13 auxiliary P4, stage 3
+  - [-1, 1, Conv, [1024, 3, 2]]       # 14 auxiliary P5 CBS downsample
+  - [-1, 2, VSSBlock, [1024, 16, 2.0, 3, 2.36]] # 15 auxiliary P5, stage 4
+
+  # Rectify primary/local and auxiliary/context features at the detector scales.
+  - [[4, 11], 1, HSR, []]             # 16 fused P3
+  - [[6, 13], 1, HSR, []]             # 17 fused P4
+  - [[8, 15], 1, HSR, []]             # 18 fused P5
+  - [-1, 1, SPPF, [1024, 5]]          # 19 SPPF after final HSR
+
+head:
+  - [19, 1, nn.Upsample, [None, 2, nearest]]
+  - [[-1, 17], 1, Concat, [1]]
+  - [-1, 3, C2f, [512]]               # 22 P4
+  - [-1, 1, nn.Upsample, [None, 2, nearest]]
+  - [[-1, 16], 1, Concat, [1]]
+  - [-1, 3, C2f, [256]]               # 25 P3
+  - [-1, 1, Conv, [256, 3, 2]]
+  - [[-1, 22], 1, Concat, [1]]
+  - [-1, 3, C2f, [512]]               # 28 P4
+  - [-1, 1, Conv, [512, 3, 2]]
+  - [[-1, 19], 1, Concat, [1]]
+  - [-1, 3, C2f, [1024]]              # 31 P5
+  - [[25, 28, 31], 1, Detect, [nc]]
